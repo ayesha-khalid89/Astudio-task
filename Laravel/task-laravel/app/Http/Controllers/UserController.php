@@ -46,7 +46,7 @@ class UserController extends Controller
             'last_name'=>'required',
             'date_of_birth'=>"required",
             'gender'=>'required',
-            'email'=>"required|email",
+            'email'=>"required|email|unique:users,email",
             'password'=>'required|min:6',
         ]);
         $userExists = User::where('email', $data['email'])->exists();
@@ -74,9 +74,17 @@ class UserController extends Controller
             'last_name'=>'required',
             'date_of_birth'=>"required",
             'gender'=>'required',
-            'email'=>"required|email",
+            'email' => 'required|email',
             'password'=>'required|min:6',
         ]);
+
+        $emailExists = User::where('email', $request->email)
+                       ->where('id', '!=', $user->id)
+                       ->exists();
+
+        if ($emailExists) {
+            return back()->withErrors(['email' => 'The email has already been taken.']);
+        }
         $user->update($data);
         return redirect(route('user.index'))->with('success','User updated successfully!');
     }
